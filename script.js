@@ -1,613 +1,269 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html>
-<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
-<head>
-    <meta charset='UTF-8'/>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover' name='viewport'/>
-    
-    <!-- SEO & Metadata Dinamis via CSV/JS -->
-    <title id="meta-title"><data:blog.pageTitle/></title>
-    <meta id="meta-desc" name="description" content="Esmpeh PWINK - Kumpulan video viral terbaru."/>
-    
-    <!-- Open Graph -->
-    <meta id="og-title" property="og:title" content=""/>
-    <meta id="og-desc" property="og:description" content=""/>
-    <meta id="og-image" property="og:image" content=""/>
-    <meta property="og:type" content="video.other"/>
-    
-    <!-- Twitter Card -->
-    <meta id="twitter-title" name="twitter:title" content=""/>
-    <meta id="twitter-desc" name="twitter:description" content=""/>
-    <meta id="twitter-image" name="twitter:image" content=""/>
-    <meta name="twitter:card" content="summary_large_image"/>
-    
-    <!-- Canonical -->
-    <link id="canonical-url" rel="canonical" href=""/>
+//<![CDATA[
+const CSV_INDO_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data.csv";
+const CSV_BARAT_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data2.csv";
+const CSV_HD_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data3.csv";
 
-    <!-- Schema.org Structured Data untuk Video -->
-    <script id="schema-video" type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "VideoObject",
-      "name": "Esmpeh PWINK",
-      "description": "Kumpulan video viral terbaru.",
-      "thumbnailUrl": "",
-      "uploadDate": "2026-01-01T00:00:00+07:00",
-      "contentUrl": ""
+const videoPageContainer = document.getElementById('video-page-container');
+const statusMessage = document.getElementById('status-message');
+
+function parseCSVLine(text) {
+    let result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        let char = text[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
     }
-    </script>
-    
-    <!-- Tag b:skin wajib ada agar Blogger tidak error -->
-    <b:skin><![CDATA[
-        /* CSS Utama dimuat dari file eksternal GitHub */
-    ]]></b:skin>
+    result.push(current.trim());
+    return result;
+}
 
-    <!-- FontAwesome -->
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
+function processDownload(videoUrl, filename) {
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 
-    <!-- Memanggil CSS dari GitHub (jsDelivr) -->
-    <link href='https://cdn.jsdelivr.net/gh/adisd321-hub/template@main/style.css' rel='stylesheet' type='text/css'/>
-</head>
-<body>
+function shareVideo(title) {
+    if (navigator.share) {
+        navigator.share({ title: title, url: window.location.href }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link berhasil disalin!');
+    }
+}
 
-    <div id='video-page-container'>
-        <div id='status-message'>Memuat video...</div>
-    </div>
+async function initVideoPlayer() {
+    // Membaca parameter query string: ?cat=...&vid=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('cat') || 'indo';
+    const slugParam = urlParams.get('vid') || '';
 
-    <!-- Memanggil JavaScript dari GitHub (jsDelivr) -->
-    <script src='https://cdn.jsdelivr.net/gh/adisd321-hub/template@main/script.js'></script>
+    let targetCsvUrl = CSV_INDO_URL;
+    if (category === 'barat') {
+        targetCsvUrl = CSV_BARAT_URL;
+    } else if (category === 'hd') {
+        targetCsvUrl = CSV_HD_URL;
+    }
 
-    <!-- Widget bawaan Blogger (Wajib ada agar XML tidak error) -->
-    <div style='display:none;'>
-        <b:section class='main' id='main-section' showaddelement='no'>
-          <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='1'>
-            <b:widget-settings>
-              <b:widget-setting name='showDateHeader'>true</b:widget-setting>
-              <b:widget-setting name='style.textcolor'>#ffffff</b:widget-setting>
-              <b:widget-setting name='showShareButtons'>true</b:widget-setting>
-              <b:widget-setting name='authorLabel'>By</b:widget-setting>
-              <b:widget-setting name='showCommentLink'>true</b:widget-setting>
-              <b:widget-setting name='style.urlcolor'>#ffffff</b:widget-setting>
-              <b:widget-setting name='showAuthor'>false</b:widget-setting>
-              <b:widget-setting name='style.linkcolor'>#ffffff</b:widget-setting>
-              <b:widget-setting name='style.unittype'>TextAndImage</b:widget-setting>
-              <b:widget-setting name='style.bgcolor'>#ffffff</b:widget-setting>
-              <b:widget-setting name='reactionsLabel'/>
-              <b:widget-setting name='showAuthorProfile'>false</b:widget-setting>
-              <b:widget-setting name='style.layout'>1x1</b:widget-setting>
-              <b:widget-setting name='showLabels'>true</b:widget-setting>
-              <b:widget-setting name='showLocation'>true</b:widget-setting>
-              <b:widget-setting name='showTimestamp'>true</b:widget-setting>
-              <b:widget-setting name='postsPerAd'>3</b:widget-setting>
-              <b:widget-setting name='showBacklinks'>false</b:widget-setting>
-              <b:widget-setting name='style.bordercolor'>#ffffff</b:widget-setting>
-              <b:widget-setting name='showInlineAds'>true</b:widget-setting>
-              <b:widget-setting name='showReactions'>false</b:widget-setting>
-            </b:widget-settings>
-            <b:includable id='main' var='top'>
-              <b:if cond='!data:mobile'>
-                <div class='blog-posts hfeed'>
-                  <b:include data='top' name='status-message'/>
-                  <b:loop values='data:posts' var='post'>
-                    <div class='post-outer'>
-                      <b:include data='post' name='post'/>
+    try {
+        let response = await fetch(targetCsvUrl);
+        let csvText = await response.text();
+        
+        let lines = csvText.split('\n');
+        let videoList = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            
+            let parts = parseCSVLine(line);
+            if (parts.length >= 6) {
+                videoList.push({
+                    slug: parts[0].replace(/^"|"$/g, ''),
+                    judul: parts[1].replace(/^"|"$/g, ''),
+                    thumbnail: parts[2].replace(/^"|"$/g, ''),
+                    deskripsi: parts[3].replace(/^"|"$/g, ''),
+                    id_source: parts[4].replace(/^"|"$/g, ''),
+                    id_short: parts[5].replace(/^"|"$/g, '')
+                });
+            }
+        }
+
+        if (videoList.length === 0) {
+            statusMessage.innerText = 'File CSV kosong atau format tidak valid!';
+            statusMessage.style.color = '#ff6b6b';
+            return;
+        }
+
+        let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam);
+        if (!videoItem) {
+            videoItem = videoList[0];
+        }
+
+        let videoSourceUrl = '';
+        if (category === 'indo') { 
+            videoSourceUrl = 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4'; 
+        }
+        else if (category === 'barat') {
+            const urls = [
+                "https://flat-breeze-f3c9.adisd5864.workers.dev/",
+                "https://rapid-mud-f1a6.adis76304.workers.dev/",
+                "https://delicate-bread-47e3.adisd0180.workers.dev/",
+                "https://aged-surf-9eca.adisd06.workers.dev/",
+                "https://mute-river-13b2.adisd419.workers.dev/",
+                "https://little-dream-9c6f.adisd4636.workers.dev/",
+                "https://calm-meadow-4d36.adisd464.workers.dev/",
+                "https://flat-rice-db77.adisd5474.workers.dev/",
+                "https://square-band-52e2.adisd633.workers.dev/",
+                "https://aged-truth-c413.adisd736.workers.dev/",
+                "https://young-silence-2c20.brittanystuart628.workers.dev/"
+            ];
+            const randomBaseUrl = urls[Math.floor(Math.random() * urls.length)];
+            videoSourceUrl = randomBaseUrl + '?id=' + videoItem.id_source;
+        }
+        else if (category === 'hd') {
+            const source_urls = [
+                "https://cdn.aguskokdoskfs.workers.dev/?id=",
+                "https://cdn.alberthodges42.workers.dev/?id=",
+                "https://cdn.alberthopper99.workers.dev/?id=",
+                "https://cdn.alishabranch09.workers.dev/?id=",
+                "https://cdn.amyhodge442.workers.dev/?id=",
+                "https://cdn.andregallagher791.workers.dev/?id=",
+                "https://cdn.andreaorr256.workers.dev/?id=",
+                "https://cdn.as8933084.workers.dev/?id=",
+                "https://cdn.antoniomaddox9.workers.dev/?id=",
+                "https://cdn.aprilgardner72.workers.dev/?id="
+            ];
+            const randomBaseUrl = source_urls[Math.floor(Math.random() * source_urls.length)];
+            videoSourceUrl = randomBaseUrl + videoItem.id_source;
+        }
+
+        const currentIndex = videoList.findIndex(item => item.slug === videoItem.slug || item.id_short === videoItem.id_short);
+        const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
+        
+        // Tautan Next Video menggunakan format parameter query
+        const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
+
+        videoPageContainer.innerHTML = `
+            <div class="video-wrapper">
+                <div class="top-nav">
+                    <a href="?cat=barat&vid=${videoList[0].slug}" class="nav-link ${category === 'barat' ? 'active' : ''}">Barat</a>
+                    <a href="?cat=indo&vid=${videoList[0].slug}" class="nav-link ${category === 'indo' ? 'active' : ''}">Indo</a>
+                    <a href="?cat=hd&vid=${videoList[0].slug}" class="nav-link ${category === 'hd' ? 'active' : ''}">HD</a>
+                </div>
+
+                <video id="main-video" src="${videoSourceUrl}" autoplay playsinline loop controlsList="nodownload"></video>
+                
+                <div class="ui-right">
+                    <div onclick="window.location.href='https://facebook.com'">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=ff85a2&color=fff" style="width:34px; height:34px; border-radius:50%; border:2px solid #fff; cursor:pointer;" alt="Admin"/>
                     </div>
-                  </b:loop>
+                    <div class="icon-box" onclick="window.location.href='${videoSourceUrl}'">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/upload.png" class="icon-img" alt="Upload"/>
+                        <div class="icon-label">Upload</div>
+                    </div>
+                    <div class="icon-box" onclick="processDownload('${videoSourceUrl}', '${videoItem.judul}.mp4')">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" class="icon-img" alt="Download"/>
+                        <div class="icon-label">Download</div>
+                    </div>
+                    <div class="icon-box" onclick="shareVideo('${videoItem.judul}')">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" class="icon-img" alt="Share"/>
+                        <div class="icon-label">Share</div>
+                    </div>
+                    <div class="icon-box" onclick="window.location.href='?cat=${category}&vid=${nextItem.slug}'">
+                        <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
+                        <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
+                    </div>
                 </div>
-              <b:else/>
-                <b:include name='mobile-main'/>
-              </b:if>
-            </b:includable>
-            <b:includable id='backlinkDeleteIcon' var='backlink'/>
-            <b:includable id='backlinks' var='post'/>
-            <b:includable id='comment-form' var='post'/>
-            <b:includable id='commentDeleteIcon' var='comment'/>
-            <b:includable id='comment_count_picker' var='post'/>
-            <b:includable id='comment_picker' var='post'/>
-            <b:includable id='comments' var='post'/>
-            <b:includable id='feedLinks'/>
-            <b:includable id='feedLinksBody' var='links'/>
-            <b:includable id='iframe_comments' var='post'/>
-            <b:includable id='mobile-index-post' var='post'/>
-            <b:includable id='mobile-main' var='top'/>
-            <b:includable id='mobile-nextprev'/>
-            <b:includable id='mobile-post' var='post'>
-  <div class='date-outer'>
-    <b:if cond='data:post.dateHeader'>
-      <h2 class='date-header'><span><data:post.dateHeader/></span></h2>
-    </b:if>
-    <div class='date-posts'>
-      <div class='post-outer'>
 
-        <div class='post hentry uncustomized-post-template' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
-          <b:if cond='data:post.thumbnailUrl'>
-            <meta expr:content='data:post.thumbnailUrl' itemprop='image_url'/>
-          </b:if>
-          <meta expr:content='data:blog.blogId' itemprop='blogId'/>
-          <meta expr:content='data:post.id' itemprop='postId'/>
-
-          <a expr:name='data:post.id'/>
-          <b:if cond='data:post.title'>
-            <h3 class='post-title entry-title' itemprop='name'>
-              <b:if cond='data:post.link'>
-                <a expr:href='data:post.link'><data:post.title/></a>
-              <b:elseif cond='data:post.url and data:blog.url != data:post.url'/>
-                <a expr:href='data:post.url'><data:post.title/></a>
-              <b:else/>
-                <data:post.title/>
-              </b:if>
-            </h3>
-          </b:if>
-
-          <div class='post-header'>
-            <div class='post-header-line-1'/>
-          </div>
-
-          <div class='post-body entry-content' expr:id='&quot;post-body-&quot; + data:post.id' itemprop='articleBody'>
-            <data:post.body/>
-            <div style='clear: both;'/>
-          </div>
-
-          <div class='post-footer'>
-            <div class='post-footer-line post-footer-line-1'>
-              <span class='post-author vcard'>
-                <b:if cond='data:top.showAuthor'>
-                  <b:if cond='data:post.authorProfileUrl'>
-                    <span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
-                      <meta expr:content='data:post.authorProfileUrl' itemprop='url'/>
-                      <a expr:href='data:post.authorProfileUrl' rel='author' title='author profile'>
-                        <span itemprop='name'><data:post.author/></span>
-                      </a>
-                    </span>
-                  <b:else/>
-                    <span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
-                      <span itemprop='name'><data:post.author/></span>
-                    </span>
-                  </b:if>
-                </b:if>
-              </span>
-
-              <span class='post-timestamp'>
-                <b:if cond='data:top.showTimestamp'>
-                  <data:top.timestampLabel/>
-                  <b:if cond='data:post.url'>
-                    <meta expr:content='data:post.url.canonical' itemprop='url'/>
-                    <a class='timestamp-link' expr:href='data:post.url' rel='bookmark' title='permanent link'><abbr class='published' expr:title='data:post.timestampISO8601' itemprop='datePublished'><data:post.timestamp/></abbr></a>
-                  </b:if>
-                </b:if>
-              </span>
-
-              <span class='post-comment-link'>
-                <b:include cond='data:blog.pageType not in {&quot;item&quot;,&quot;static_page&quot;} and data:post.allowComments' data='post' name='comment_count_picker'/>
-              </span>
-            </div>
-
-            <div class='post-footer-line post-footer-line-2'>
-              <b:if cond='data:top.showMobileShare'>
-                <div class='mobile-link-button goog-inline-block' id='mobile-share-button'>
-                  <a href='javascript:void(0);'><data:shareMsg/></a>
+                <div class="video-controls-bar">
+                    <div class="progress-bar-container" id="progress-container">
+                        <div class="progress-filled" id="progress-filled"></div>
+                    </div>
+                    <button class="control-icon-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
+                    <button class="control-icon-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
                 </div>
-              </b:if>
+
+                <div class="ui-bottom">
+                    <div class="channel-title">Esmpeh PWINK</div>
+                    <div class="btn-container">
+                        <a href="https://www.facebook.com/groups/1334469158799363" class="btn-mini btn-sub" target="_blank">+ Join Group FB Sekarang</a>
+                        <a href="${nextVideoUrl}" class="btn-mini">Next Video</a>
+                    </div>
+                    <div id="desc-box">${videoItem.deskripsi}</div>
+                </div>
             </div>
+        `;
 
-          </div>
-        </div>
+        statusMessage.style.display = 'none';
 
-        <b:include cond='data:blog.pageType in {&quot;static_page&quot;,&quot;item&quot;}' data='post' name='comment_picker'/>
-      </div>
-    </div>
-  </div>
-</b:includable>
-            <b:includable id='nextprev'>
-  <div class='blog-pager' id='blog-pager'>
-    <b:if cond='data:newerPageUrl'>
-      <span id='blog-pager-newer-link'>
-      <a class='blog-pager-newer-link' expr:href='data:newerPageUrl' expr:id='data:widget.instanceId + &quot;_blog-pager-newer-link&quot;' expr:title='data:newerPageTitle'><data:newerPageTitle/></a>
-      </span>
-    </b:if>
+        // Pengaturan SEO & Metadata Dinamis
+        document.title = videoItem.judul + " | Esemph Pwink";
+        if(document.getElementById('meta-title')) document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
+        if(document.getElementById('meta-desc')) document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
+        
+        if(document.getElementById('og-title')) document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        if(document.getElementById('og-desc')) document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
+        if(document.getElementById('og-image')) document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
+        
+        if(document.getElementById('twitter-title')) document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        if(document.getElementById('twitter-desc')) document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
+        if(document.getElementById('twitter-image')) document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
+        
+        if(document.getElementById('canonical-url')) document.getElementById('canonical-url').setAttribute('href', window.location.href);
 
-    <b:if cond='data:olderPageUrl'>
-      <span id='blog-pager-older-link'>
-      <a class='blog-pager-older-link' expr:href='data:olderPageUrl' expr:id='data:widget.instanceId + &quot;_blog-pager-older-link&quot;' expr:title='data:olderPageTitle'><data:olderPageTitle/></a>
-      </span>
-    </b:if>
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": videoItem.judul,
+            "description": videoItem.deskripsi,
+            "thumbnailUrl": videoItem.thumbnail,
+            "uploadDate": "2026-01-01T00:00:00+07:00",
+            "contentUrl": videoSourceUrl
+        };
+        if(document.getElementById('schema-video')) document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
 
-    <a class='home-link' expr:href='data:blog.homepageUrl'><data:homeMsg/></a>
+        // Event Listener Pemutar Video
+        const mainVideo = document.getElementById('main-video');
+        const progressFilled = document.getElementById('progress-filled');
+        const progressContainer = document.getElementById('progress-container');
+        const muteBtn = document.getElementById('mute-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
 
-    <b:if cond='data:mobileLinkUrl'>
-      <div class='blog-mobile-link'>
-        <a expr:href='data:mobileLinkUrl'><data:mobileLinkMsg/></a>
-      </div>
-    </b:if>
+        mainVideo.addEventListener('click', () => {
+            if (mainVideo.paused) mainVideo.play(); else mainVideo.pause();
+        });
 
-  </div>
-  <div class='clear'/>
-</b:includable>
-            <b:includable id='post' var='post'>
-  <div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
-    <b:if cond='data:post.firstImageUrl'>
-      <meta expr:content='data:post.firstImageUrl' itemprop='image_url'/>
-    </b:if>
-    <meta expr:content='data:blog.blogId' itemprop='blogId'/>
-    <meta expr:content='data:post.id' itemprop='postId'/>
-
-    <a expr:name='data:post.id'/>
-    <b:if cond='data:post.title'>
-      <h3 class='post-title entry-title' itemprop='name'>
-      <b:if cond='data:post.link or (data:post.url and data:blog.url != data:post.url)'>
-        <a expr:href='data:post.link ? data:post.link : data:post.url'><data:post.title/></a>
-      <b:else/>
-        <data:post.title/>
-      </b:if>
-      </h3>
-    </b:if>
-
-    <div class='post-header'>
-    <div class='post-header-line-1'/>
-    </div>
-
-    <div class='post-body entry-content' expr:id='&quot;post-body-&quot; + data:post.id' expr:itemprop='(data:blog.metaDescription ? &quot;&quot; : &quot;description &quot;) + &quot;articleBody&quot;'>
-      <data:post.body/>
-      <div style='clear: both;'/>
-    </div>
-
-    <b:if cond='data:post.hasJumpLink'>
-      <div class='jump-link'>
-        <a expr:href='data:post.url + &quot;#more&quot;' expr:title='data:post.title'><data:post.jumpText/></a>
-      </div>
-    </b:if>
-
-    <div class='post-footer'>
-    <div class='post-footer-line post-footer-line-1'>
-      <span class='post-author vcard'>
-        <b:if cond='data:top.showAuthor'>
-          <data:top.authorLabel/>
-            <b:if cond='data:post.authorProfileUrl'>
-              <span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
-                <meta expr:content='data:post.authorProfileUrl' itemprop='url'/>
-                <a class='g-profile' expr:href='data:post.authorProfileUrl' rel='author' title='author profile'>
-                  <span itemprop='name'><data:post.author/></span>
-                </a>
-              </span>
-            <b:else/>
-              <span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
-                <span itemprop='name'><data:post.author/></span>
-              </span>
-            </b:if>
-        </b:if>
-      </span>
-
-      <span class='post-timestamp'>
-        <b:if cond='data:top.showTimestamp'>
-          <data:top.timestampLabel/>
-          <b:if cond='data:post.url'>
-            <meta expr:content='data:post.url.canonical' itemprop='url'/>
-            <a class='timestamp-link' expr:href='data:post.url' rel='bookmark' title='permanent link'><abbr class='published' expr:title='data:post.timestampISO8601' itemprop='datePublished'><data:post.timestamp/></abbr></a>
-          </b:if>
-        </b:if>
-      </span>
-
-      <span class='post-comment-link'>
-        <b:include cond='data:blog.pageType not in {&quot;item&quot;,&quot;static_page&quot;} and data:post.allowComments' data='post' name='comment_count_picker'/>
-      </span>
-
-      <span class='post-icons'>
-        <b:if cond='data:post.emailPostUrl'>
-          <span class='item-action'>
-          <a expr:href='data:post.emailPostUrl' expr:title='data:top.emailPostMsg'>
-            <img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
-          </a>
-          </span>
-        </b:if>
-        <b:include data='post' name='postQuickEdit'/>
-      </span>
-
-      <div class='post-share-buttons goog-inline-block'>
-        <b:include cond='data:post.sharePostUrl' data='post' name='shareButtons'/>
-      </div>
-
-      </div>
-
-      <div class='post-footer-line post-footer-line-2'>
-      <span class='post-labels'>
-        <b:if cond='data:top.showPostLabels and data:post.labels'>
-          <data:postLabelsLabel/>
-          <b:loop values='data:post.labels' var='label'>
-            <a expr:href='data:label.url' rel='tag'><data:label.name/></a><b:if cond='not data:label.isLast'>,</b:if>
-          </b:loop>
-        </b:if>
-      </span>
-      </div>
-
-      <div class='post-footer-line post-footer-line-3'>
-      <span class='post-location'>
-        <b:if cond='data:top.showLocation and data:post.location'>
-          <data:postLocationLabel/>
-          <a expr:href='data:post.location.mapsUrl' target='_blank'><data:post.location.name/></a>
-        </b:if>
-      </span>
-      </div>
-      <b:if cond='data:post.authorAboutMe'>
-        <div class='author-profile' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
-          <b:if cond='data:post.authorPhoto.url'>
-            <img expr:src='data:post.authorPhoto.url' itemprop='image' width='50px'/>
-          </b:if>
-          <div>
-            <a class='g-profile' expr:href='data:post.authorProfileUrl' itemprop='url' rel='author' title='author profile'>
-              <span itemprop='name'><data:post.author/></span>
-            </a>
-          </div>
-          <span itemprop='description'><data:post.authorAboutMe/></span>
-        </div>
-      </b:if>
-    </div>
-  </div>
-</b:includable>
-            <b:includable id='postQuickEdit' var='post'>
-  <b:if cond='data:post.editUrl'>
-    <span expr:class='&quot;item-control &quot; + data:post.adminClass'>
-      <a expr:href='data:post.editUrl' expr:title='data:top.editPostMsg'>
-        <img alt='' class='icon-action' height='18' src='https://resources.blogblog.com/img/icon18_edit_allbkg.gif' width='18'/>
-      </a>
-    </span>
-  </b:if>
-</b:includable>
-            <b:includable id='shareButtons' var='post'>
-  <b:if cond='data:top.showEmailButton'><a class='goog-inline-block share-button sb-email' expr:href='data:post.sharePostUrl + &quot;&amp;target=email&quot;' expr:title='data:top.emailThisMsg' target='_blank'><span class='share-button-link-text'><data:top.emailThisMsg/></span></a></b:if><b:if cond='data:top.showBlogThisButton'><a class='goog-inline-block share-button sb-blog' expr:href='data:post.sharePostUrl + &quot;&amp;target=blog&quot;' expr:onclick='&quot;window.open(this.href, \&quot;_blank\&quot;, \&quot;height=270,width=475\&quot;); return false;&quot;' expr:title='data:top.blogThisMsg' target='_blank'><span class='share-button-link-text'><data:top.blogThisMsg/></span></a></b:if><b:if cond='data:top.showTwitterButton'><a class='goog-inline-block share-button sb-twitter' expr:href='data:post.sharePostUrl + &quot;&amp;target=twitter&quot;' expr:title='data:top.shareToTwitterMsg' target='_blank'><span class='share-button-link-text'><data:top.shareToTwitterMsg/></span></a></b:if><b:if cond='data:top.showFacebookButton'><a class='goog-inline-block share-button sb-facebook' expr:href='data:post.sharePostUrl + &quot;&amp;target=facebook&quot;' expr:onclick='&quot;window.open(this.href, \&quot;_blank\&quot;, \&quot;height=430,width=640\&quot;); return false;&quot;' expr:title='data:top.shareToFacebookMsg' target='_blank'><span class='share-button-link-text'><data:top.shareToFacebookMsg/></span></a></b:if><b:if cond='data:top.showPinterestButton'><a class='goog-inline-block share-button sb-pinterest' expr:href='data:post.sharePostUrl + &quot;&amp;target=pinterest&quot;' expr:title='data:top.shareToPinterestMsg' target='_blank'><span class='share-button-link-text'><data:top.shareToPinterestMsg/></span></a></b:if>
-</b:includable>
-            <b:includable id='status-message'>
-  <b:if cond='data:navMessage'>
-  <div class='status-msg-wrap'>
-    <div class='status-msg-body'>
-      <data:navMessage/>
-    </div>
-    <div class='status-msg-border'>
-      <div class='status-msg-bg'>
-        <div class='status-msg-hidden'><data:navMessage/></div>
-      </div>
-    </div>
-  </div>
-  <div style='clear: both;'/>
-  </b:if>
-</b:includable>
-            <b:includable id='threaded-comment-form' var='post'>
-  <div class='comment-form'>
-    <a name='comment-form'/>
-    <b:if cond='data:mobile'>
-      <p><data:blogCommentMessage/></p>
-      <data:blogTeamBlogMessage/>
-      <a expr:href='data:post.commentFormIframeSrc' id='comment-editor-src'/>
-      <iframe allowtransparency='true' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight' frameborder='0' id='comment-editor' name='comment-editor' src='' style='display: none' width='100%'/>
-    <b:else/>
-      <p><data:blogCommentMessage/></p>
-      <data:blogTeamBlogMessage/>
-      <a expr:href='data:post.commentFormIframeSrc' id='comment-editor-src'/>
-      <iframe allowtransparency='true' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight' frameborder='0' id='comment-editor' name='comment-editor' src='' width='100%'/>
-    </b:if>
-    <data:post.cmtfpIframe/>
-    <script type='text/javascript'>
-      BLOG_CMT_createIframe(&#39;<data:post.appRpcRelayPath/>&#39;);
-    </script>
-  </div>
-</b:includable>
-            <b:includable id='threaded_comment_js' var='post'>
-  <script async='async' expr:src='data:post.commentSrc' type='text/javascript'/>
-
-  <script type='text/javascript'>
-    (function() {
-      var items = <data:post.commentJso/>;
-      var msgs = <data:post.commentMsgs/>;
-      var config = <data:post.commentConfig/>;
-
-// <![CDATA[
-      var cursor = null;
-      if (items && items.length > 0) {
-        cursor = parseInt(items[items.length - 1].timestamp) + 1;
-      }
-
-      var bodyFromEntry = function(entry) {
-        var text = (entry &&
-                    ((entry.content && entry.content.$t) ||
-                     (entry.summary && entry.summary.$t))) ||
-            '';
-        if (entry && entry.gd$extendedProperty) {
-          for (var k in entry.gd$extendedProperty) {
-            if (entry.gd$extendedProperty[k].name == 'blogger.contentRemoved') {
-              return '<span class="deleted-comment">' + text + '</span>';
+        mainVideo.addEventListener('timeupdate', () => {
+            if(mainVideo.duration) {
+                const percent = (mainVideo.currentTime / mainVideo.duration) * 100;
+                progressFilled.style.width = percent + '%';
             }
-          }
-        }
-        return text;
-      }
+        });
 
-      var parse = function(data) {
-        cursor = null;
-        var comments = [];
-        if (data && data.feed && data.feed.entry) {
-          for (var i = 0, entry; entry = data.feed.entry[i]; i++) {
-            var comment = {};
-            var id = /blog-(\d+).post-(\d+)/.exec(entry.id.$t);
-            comment.id = id ? id[2] : null;
-            comment.body = bodyFromEntry(entry);
-            comment.timestamp = Date.parse(entry.published.$t) + '';
-            if (entry.author && entry.author.constructor === Array) {
-              var auth = entry.author[0];
-              if (auth) {
-                comment.author = {
-                  name: (auth.name ? auth.name.$t : undefined),
-                  profileUrl: (auth.uri ? auth.uri.$t : undefined),
-                  avatarUrl: (auth.gd$image ? auth.gd$image.src : undefined)
-                };
-              }
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            mainVideo.currentTime = pos * mainVideo.duration;
+        });
+
+        muteBtn.addEventListener('click', () => {
+            mainVideo.muted = !mainVideo.muted;
+            muteBtn.innerHTML = mainVideo.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (mainVideo.requestFullscreen) {
+                mainVideo.requestFullscreen();
+            } else if (mainVideo.webkitRequestFullscreen) {
+                mainVideo.webkitRequestFullscreen();
             }
-            if (entry.link) {
-              if (entry.link[2]) {
-                comment.link = comment.permalink = entry.link[2].href;
-              }
-              if (entry.link[3]) {
-                var pid = /.*comments\/default\/(\d+)\?.*/.exec(entry.link[3].href);
-                if (pid && pid[1]) {
-                  comment.parentId = pid[1];
-                }
-              }
-            }
-            comment.deleteclass = 'item-control blog-admin';
-            if (entry.gd$extendedProperty) {
-              for (var k in entry.gd$extendedProperty) {
-                if (entry.gd$extendedProperty[k].name == 'blogger.itemClass') {
-                  comment.deleteclass += ' ' + entry.gd$extendedProperty[k].value;
-                } else if (entry.gd$extendedProperty[k].name == 'blogger.displayTime') {
-                  comment.displayTime = entry.gd$extendedProperty[k].value;
-                }
-              }
-            }
-            comments.push(comment);
-          }
-        }
-        return comments;
-      };
+        });
 
-      var paginator = function(callback) {
-        if (hasMore()) {
-          var url = config.feed + '?alt=json&v=2&orderby=published&reverse=false&max-results=50';
-          if (cursor) {
-            url += '&published-min=' + new Date(cursor).toISOString();
-          }
-          window.bloggercomments = function(data) {
-            var parsed = parse(data);
-            cursor = parsed.length < 50 ? null
-                : parseInt(parsed[parsed.length - 1].timestamp) + 1
-            callback(parsed);
-            window.bloggercomments = null;
-          }
-          url += '&callback=bloggercomments';
-          var script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.src = url;
-          document.getElementsByTagName('head')[0].appendChild(script);
-        }
-      };
-      var hasMore = function() {
-        return !!cursor;
-      };
-      var getMeta = function(key, comment) {
-        if ('iswriter' == key) {
-          var matches = !!comment.author
-              && comment.author.name == config.authorName
-              && comment.author.profileUrl == config.authorUrl;
-          return matches ? 'true' : '';
-        } else if ('deletelink' == key) {
-          return config.baseUri + '/comment/delete/'
-               + config.blogId + '/' + comment.id;
-        } else if ('deleteclass' == key) {
-          return comment.deleteclass;
-        }
-        return '';
-      };
+        mainVideo.addEventListener('error', () => {
+            statusMessage.innerHTML = 'Video gagal dimuat atau tidak tersedia.<br/><br/>' +
+                                      '<a href="' + nextVideoUrl + '" class="btn-next" style="display:inline-block; width:120px; background: #2ed573;">Next Video</a>';
+            statusMessage.style.display = 'flex';
+            mainVideo.style.display = 'none';
+        });
 
-      var replybox = null;
-      var replyUrlParts = null;
-      var replyParent = undefined;
+    } catch (err) {
+        statusMessage.innerText = 'Gagal mengambil data dari file CSV hosting.';
+        statusMessage.style.color = '#ff6b6b';
+    }
+}
 
-      var onReply = function(commentId, domId) {
-        if (replybox == null) {
-          replybox = document.getElementById('comment-editor');
-          if (replybox != null) {
-            replybox.height = '250px';
-            replybox.style.display = 'block';
-            replyUrlParts = replybox.src.split('#');
-          }
-        }
-        if (replybox && (commentId !== replyParent)) {
-          replybox.src = '';
-          document.getElementById(domId).insertBefore(replybox, null);
-          replybox.src = replyUrlParts[0]
-              + (commentId ? '&parentID=' + commentId : '')
-              + '#' + replyUrlParts[1];
-          replyParent = commentId;
-        }
-      };
-
-      var hash = (window.location.hash || '#').substring(1);
-      var startThread, targetComment;
-      if (/^comment-form_/.test(hash)) {
-        startThread = hash.substring('comment-form_'.length);
-      } else if (/^c[0-9]+$/.test(hash)) {
-        targetComment = hash.substring(1);
-      }
-
-      var configJso = {
-        'maxDepth': config.maxThreadDepth
-      };
-      var provider = {
-        'id': config.postId,
-        'data': items,
-        'loadNext': paginator,
-        'hasMore': hasMore,
-        'getMeta': getMeta,
-        'onReply': onReply,
-        'rendered': true,
-        'initComment': targetComment,
-        'initReplyThread': startThread,
-        'config': configJso,
-        'messages': msgs
-      };
-
-      var render = function() {
-        if (window.goog && window.goog.comments) {
-          var holder = document.getElementById('comment-holder');
-          window.goog.comments.render(holder, provider);
-        }
-      };
-
-      if (window.goog && window.goog.comments) {
-        render();
-      } else {
-        window.goog = window.goog || {};
-        window.goog.comments = window.goog.comments || {};
-        window.goog.comments.loadQueue = window.goog.comments.loadQueue || [];
-        window.goog.comments.loadQueue.push(render);
-      }
-    })();
-// ]]>
-  </script>
-</b:includable>
-            <b:includable id='threaded_comments' var='post'>
-  <div class='comments' id='comments'>
-    <a name='comments'/>
-    <h4><data:post.commentLabelFull/>:</h4>
-
-    <div class='comments-content'>
-      <b:include cond='data:post.embedCommentForm' data='post' name='threaded_comment_js'/>
-      <div id='comment-holder'>
-         <data:post.commentHtml/>
-      </div>
-    </div>
-
-    <p class='comment-footer'>
-      <b:if cond='data:post.allowNewComments'>
-        <b:include data='post' name='threaded-comment-form'/>
-      <b:else/>
-        <data:post.noNewCommentsText/>
-      </b:if>
-    </p>
-
-    <b:if cond='data:showCmtPopup'>
-      <div id='comment-popup'>
-        <iframe allowtransparency='true' frameborder='0' id='comment-actions' name='comment-actions' scrolling='no'>
-        </iframe>
-      </div>
-    </b:if>
-
-    <div id='backlinks-container'>
-    <div expr:id='data:widget.instanceId + &quot;_backlinks-container&quot;'>
-    </div>
-    </div>
-  </div>
-</b:includable>
-          </b:widget>
-        </b:section>
-    </div>
-
-</body>
-</html>
+window.addEventListener('DOMContentLoaded', initVideoPlayer);
+//]]>
