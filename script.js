@@ -159,7 +159,7 @@ async function initVideoPlayer() {
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" class="icon-img" alt="Share"/>
                         <div class="icon-label">Share</div>
                     </div>
-                    <div class="icon-box" onclick="https://gawrge.blogspot.com/terbaru'?cat=${category}'">
+                    <div class="icon-box" onclick="window.location.href='https://gawrge.blogspot.com/terbaru?cat=${category}'">
                         <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
                         <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
                     </div>
@@ -185,6 +185,50 @@ async function initVideoPlayer() {
         `;
 
         statusMessage.style.display = 'none';
+
+        // Update SEO Meta Tags secara dinamis berdasarkan data video dari CSV
+        document.title = videoItem.judul + " | Esemph Pwink";
+        const metaTitle = document.getElementById('meta-title');
+        if (metaTitle) metaTitle.innerText = videoItem.judul + " | Esemph Pwink";
+        
+        const metaDesc = document.getElementById('meta-desc');
+        if (metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
+        
+        const ogTitle = document.getElementById('og-title');
+        if (ogTitle) ogTitle.setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        
+        const ogDesc = document.getElementById('og-desc');
+        if (ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
+        
+        const ogImage = document.getElementById('og-image');
+        if (ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
+        
+        const twitterTitle = document.getElementById('twitter-title');
+        if (twitterTitle) twitterTitle.setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        
+        const twitterDesc = document.getElementById('twitter-desc');
+        if (twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
+        
+        const twitterImage = document.getElementById('twitter-image');
+        if (twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
+        
+        const canonicalUrl = document.getElementById('canonical-url');
+        if (canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
+
+        // Update Schema.org JSON-LD
+        const schemaVideo = document.getElementById('schema-video');
+        if (schemaVideo) {
+            const schemaData = {
+                "@context": "https://schema.org",
+                "@type": "VideoObject",
+                "name": videoItem.judul,
+                "description": videoItem.deskripsi,
+                "thumbnailUrl": videoItem.thumbnail,
+                "uploadDate": "2026-01-01T00:00:00+07:00",
+                "contentUrl": videoSourceUrl
+            };
+            schemaVideo.text = JSON.stringify(schemaData, null, 2);
+        }
 
         const mainVideo = document.getElementById('main-video');
         const progressFilled = document.getElementById('progress-filled');
@@ -236,30 +280,4 @@ async function initVideoPlayer() {
 }
 
 initVideoPlayer();
-//]]>|
-// Update SEO Meta Tags secara dinamis berdasarkan data video dari CSV
-        document.title = videoItem.judul + " | Esemph Pwink";
-        document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
-        document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
-        
-        document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
-        document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
-        
-        document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
-        document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
-        
-        document.getElementById('canonical-url').setAttribute('href', window.location.href);
-
-        // Update Schema.org JSON-LD
-        const schemaData = {
-            "@context": "https://schema.org",
-            "@type": "VideoObject",
-            "name": videoItem.judul,
-            "description": videoItem.deskripsi,
-            "thumbnailUrl": videoItem.thumbnail,
-            "uploadDate": "2026-01-01T00:00:00+07:00",
-            "contentUrl": videoSourceUrl
-        };
-        document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
+//]]>
