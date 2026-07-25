@@ -45,17 +45,16 @@ function shareVideo(title) {
 }
 
 async function initVideoPlayer() {
-    // 1. Deteksi Kategori dan Slug berdasarkan Path URL (cth: /indo/slug, /barat/slug, /hd/slug)
-    // Sekaligus memberikan fallback ke Query Parameters (?cat=...&vid=...) jika diperlukan
-    const path = window.location.pathname;
+    // Membaca Hash URL (cth: #/indo/slug atau #/barat/slug atau #/hd/slug)
+    const hash = window.location.hash; 
     const urlParams = new URLSearchParams(window.location.search);
     
     let category = 'indo';
     let slugParam = '';
 
-    const indoMatch = path.match(/^\/indo\/(.+)$/);
-    const baratMatch = path.match(/^\/barat\/(.+)$/);
-    const hdMatch = path.match(/^\/hd\/(.+)$/);
+    const indoMatch = hash.match(/^#\/indo\/(.+)$/);
+    const baratMatch = hash.match(/^#\/barat\/(.+)$/);
+    const hdMatch = hash.match(/^#\/hd\/(.+)$/);
 
     if (indoMatch) {
         category = 'indo';
@@ -67,7 +66,7 @@ async function initVideoPlayer() {
         category = 'hd';
         slugParam = hdMatch[1];
     } else {
-        // Fallback ke Query Parameters lama jika path root / parameter query biasa digunakan
+        // Fallback ke parameter lama jika hash kosong (?cat=...&vid=...)
         category = urlParams.get('cat') || 'indo';
         slugParam = urlParams.get('vid') || '';
     }
@@ -155,15 +154,15 @@ async function initVideoPlayer() {
         const currentIndex = videoList.findIndex(item => item.slug === videoItem.slug || item.id_short === videoItem.id_short);
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
         
-        // Sesuaikan target tautan Next Video agar mengarah ke struktur path baru
-        const nextVideoUrl = nextItem ? ('/' + category + '/' + nextItem.slug) : '#';
+        // Tautan Next Video menggunakan format hash
+        const nextVideoUrl = nextItem ? ('#/' + category + '/' + nextItem.slug) : '#';
 
         videoPageContainer.innerHTML = `
             <div class="video-wrapper">
                 <div class="top-nav">
-                    <a href="/barat/${videoList[0].slug}" class="nav-link ${category === 'barat' ? 'active' : ''}">Barat</a>
-                    <a href="/indo/${videoList[0].slug}" class="nav-link ${category === 'indo' ? 'active' : ''}">Indo</a>
-                    <a href="/hd/${videoList[0].slug}" class="nav-link ${category === 'hd' ? 'active' : ''}">HD</a>
+                    <a href="#/barat/${videoList[0].slug}" class="nav-link ${category === 'barat' ? 'active' : ''}">Barat</a>
+                    <a href="#/indo/${videoList[0].slug}" class="nav-link ${category === 'indo' ? 'active' : ''}">Indo</a>
+                    <a href="#/hd/${videoList[0].slug}" class="nav-link ${category === 'hd' ? 'active' : ''}">HD</a>
                 </div>
 
                 <video id="main-video" src="${videoSourceUrl}" autoplay playsinline loop controlsList="nodownload"></video>
@@ -184,7 +183,7 @@ async function initVideoPlayer() {
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" class="icon-img" alt="Share"/>
                         <div class="icon-label">Share</div>
                     </div>
-                    <div class="icon-box" onclick="window.location.href='/${category}/${nextItem.slug}'">
+                    <div class="icon-box" onclick="window.location.href='#/${category}/${nextItem.slug}'">
                         <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
                         <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
                     </div>
@@ -211,7 +210,7 @@ async function initVideoPlayer() {
 
         statusMessage.style.display = 'none';
 
-        // 2. Eksekusi Pengaturan SEO Dinamis
+        // Pengaturan SEO Dinamis
         document.title = videoItem.judul + " | Esemph Pwink";
         if(document.getElementById('meta-title')) document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
         if(document.getElementById('meta-desc')) document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
@@ -287,5 +286,7 @@ async function initVideoPlayer() {
     }
 }
 
-initVideoPlayer();
+// Jalankan saat halaman dimuat dan ketika hash URL berubah
+window.addEventListener('DOMContentLoaded', initVideoPlayer);
+window.addEventListener('hashchange', initVideoPlayer);
 //]]>
