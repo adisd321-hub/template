@@ -221,6 +221,14 @@ async function initVideoPlayer() {
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
         const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
 
+        // Menentukan URL Hot Video berdasarkan kategori aktif
+        let hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=indo";
+        if (category === 'barat') {
+            hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=barat";
+        } else if (category === 'hd') {
+            hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=hd";
+        }
+
         videoPageContainer.innerHTML = `
             <div class="video-wrapper">
                 <div class="top-nav">
@@ -247,7 +255,7 @@ async function initVideoPlayer() {
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" class="icon-img" alt="Share"/>
                         <div class="icon-label">Share</div>
                     </div>
-                    <div class="icon-box" onclick="window.location.href='?cat=${category}&vid=${nextItem.slug}'">
+                    <div class="icon-box" onclick="window.location.href='${hotVideoUrl}'">
                         <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
                         <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
                     </div>
