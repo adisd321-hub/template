@@ -3,7 +3,6 @@ const CSV_INDO_URL = "https://raw.githubusercontent.com/adisd321-hub/database-vi
 const CSV_BARAT_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data2.csv";
 const CSV_HD_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data3.csv";
 
-const urlParams = new URLSearchParams(window.location.search);
 const videoPageContainer = document.getElementById('video-page-container');
 const statusMessage = document.getElementById('status-message');
 
@@ -46,8 +45,32 @@ function shareVideo(title) {
 }
 
 async function initVideoPlayer() {
-    const category = urlParams.get('cat') || 'indo';
-    let slugParam = urlParams.get('vid');
+    // 1. Deteksi Kategori dan Slug berdasarkan Path URL (cth: /indo/slug, /barat/slug, /hd/slug)
+    // Sekaligus memberikan fallback ke Query Parameters (?cat=...&vid=...) jika diperlukan
+    const path = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    let category = 'indo';
+    let slugParam = '';
+
+    const indoMatch = path.match(/^\/indo\/(.+)$/);
+    const baratMatch = path.match(/^\/barat\/(.+)$/);
+    const hdMatch = path.match(/^\/hd\/(.+)$/);
+
+    if (indoMatch) {
+        category = 'indo';
+        slugParam = indoMatch[1];
+    } else if (baratMatch) {
+        category = 'barat';
+        slugParam = baratMatch[1];
+    } else if (hdMatch) {
+        category = 'hd';
+        slugParam = hdMatch[1];
+    } else {
+        // Fallback ke Query Parameters lama jika path root / parameter query biasa digunakan
+        category = urlParams.get('cat') || 'indo';
+        slugParam = urlParams.get('vid') || '';
+    }
 
     let targetCsvUrl = CSV_INDO_URL;
     if (category === 'barat') {
@@ -131,14 +154,16 @@ async function initVideoPlayer() {
 
         const currentIndex = videoList.findIndex(item => item.slug === videoItem.slug || item.id_short === videoItem.id_short);
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
-        const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
+        
+        // Sesuaikan target tautan Next Video agar mengarah ke struktur path baru
+        const nextVideoUrl = nextItem ? ('/' + category + '/' + nextItem.slug) : '#';
 
         videoPageContainer.innerHTML = `
             <div class="video-wrapper">
                 <div class="top-nav">
-                    <a href="?cat=barat" class="nav-link ${category === 'barat' ? 'active' : ''}">Barat</a>
-                    <a href="?cat=indo" class="nav-link ${category === 'indo' ? 'active' : ''}">Indo</a>
-                    <a href="?cat=hd" class="nav-link ${category === 'hd' ? 'active' : ''}">HD</a>
+                    <a href="/barat/${videoList[0].slug}" class="nav-link ${category === 'barat' ? 'active' : ''}">Barat</a>
+                    <a href="/indo/${videoList[0].slug}" class="nav-link ${category === 'indo' ? 'active' : ''}">Indo</a>
+                    <a href="/hd/${videoList[0].slug}" class="nav-link ${category === 'hd' ? 'active' : ''}">HD</a>
                 </div>
 
                 <video id="main-video" src="${videoSourceUrl}" autoplay playsinline loop controlsList="nodownload"></video>
@@ -159,7 +184,7 @@ async function initVideoPlayer() {
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" class="icon-img" alt="Share"/>
                         <div class="icon-label">Share</div>
                     </div>
-                    <div class="icon-box" onclick="window.location.href='?cat=${category}&vid=${nextItem.slug}'">
+                    <div class="icon-box" onclick="window.location.href='/${category}/${nextItem.slug}'">
                         <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
                         <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
                     </div>
@@ -186,6 +211,33 @@ async function initVideoPlayer() {
 
         statusMessage.style.display = 'none';
 
+        // 2. Eksekusi Pengaturan SEO Dinamis
+        document.title = videoItem.judul + " | Esemph Pwink";
+        if(document.getElementById('meta-title')) document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
+        if(document.getElementById('meta-desc')) document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
+        
+        if(document.getElementById('og-title')) document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        if(document.getElementById('og-desc')) document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
+        if(document.getElementById('og-image')) document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
+        
+        if(document.getElementById('twitter-title')) document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        if(document.getElementById('twitter-desc')) document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
+        if(document.getElementById('twitter-image')) document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
+        
+        if(document.getElementById('canonical-url')) document.getElementById('canonical-url').setAttribute('href', window.location.href);
+
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": videoItem.judul,
+            "description": videoItem.deskripsi,
+            "thumbnailUrl": videoItem.thumbnail,
+            "uploadDate": "2026-01-01T00:00:00+07:00",
+            "contentUrl": videoSourceUrl
+        };
+        if(document.getElementById('schema-video')) document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
+
+        // Event Listener Pemutar Video
         const mainVideo = document.getElementById('main-video');
         const progressFilled = document.getElementById('progress-filled');
         const progressContainer = document.getElementById('progress-container');
@@ -237,59 +289,3 @@ async function initVideoPlayer() {
 
 initVideoPlayer();
 //]]>
-let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam);
-        if (!videoItem) {
-            videoItem = videoList[0];
-        }
-
-        let videoSourceUrl = '';
-        // ... (kode URL video Anda yang lain) ...
-
-        // ---- PASTE KODE SEO DI SINI ----
-        document.title = videoItem.judul + " | Esemph Pwink";
-        document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
-        document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
-        
-        document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
-        document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
-        
-        document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
-        document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
-        
-        document.getElementById('canonical-url').setAttribute('href', window.location.href);
-
-        const schemaData = {
-            "@context": "https://schema.org",
-            "@type": "VideoObject",
-            "name": videoItem.judul,
-            "description": videoItem.deskripsi,
-            "thumbnailUrl": videoItem.thumbnail,
-            "uploadDate": "2026-01-01T00:00:00+07:00",
-            "contentUrl": videoSourceUrl
-        };
-        document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
-        // ---------------------------------
-
-window.addEventListener('DOMContentLoaded', () => {
-    // Membaca hash dari URL, misal: domain.com/#/indo/slug-video
-    const hash = window.location.hash; // Contoh: #/indo/nama-slug
-    
-    const indoMatch = hash.match(/^#\/indo\/(.+)$/);
-    const baratMatch = hash.match(/^#\/barat\/(.+)$/);
-    const hdMatch = hash.match(/^#\/hd\/(.+)$/);
-
-    if (indoMatch) {
-        const slug = indoMatch[1];
-        loadVideoBySlugAndCategory('indo', slug);
-    } else if (baratMatch) {
-        const slug = baratMatch[1];
-        loadVideoBySlugAndCategory('barat', slug);
-    } else if (hdMatch) {
-        const slug = hdMatch[1];
-        loadVideoBySlugAndCategory('hd', slug);
-    } else {
-        initDefaultPage();
-    }
-});
