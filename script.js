@@ -219,7 +219,7 @@ async function initVideoPlayer() {
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
         const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
 
-        // URL Hot Video mengarah ke Blogspot sesuai kategori aktif
+        // URL Hot Video mengarah ke Blogspot sesuai kategori (fix agar tidak keliru)
         let hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=indo";
         if (category === 'barat') {
             hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=barat";
