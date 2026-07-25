@@ -1,0 +1,192 @@
+body, h1, h2, h3, p, div { margin: 0; padding: 0; box-sizing: border-box; }
+#navbar-iframe, .navbar, .widget.Navbar { display: none !important; height: 0 !important; opacity: 0 !important; overflow: hidden !important; }
+
+html, body {
+    background-color: #000000;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+}
+
+#video-page-container {
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 450px;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#main-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.top-nav {
+    position: absolute;
+    top: env(safe-area-inset-top, 4px);
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    z-index: 30;
+    pointer-events: auto;
+}
+
+.nav-link {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding-bottom: 2px;
+    transition: color 0.2s;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.nav-link.active {
+    color: #ffffff;
+    border-bottom: 2px solid #ff4757;
+}
+
+.ui-right {
+    position: absolute;
+    right: 12px;
+    bottom: calc(115px + env(safe-area-inset-bottom, 0px));
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+}
+
+.icon-box {
+    text-align: center;
+    cursor: pointer;
+}
+
+.icon-img {
+    width: 26px;
+    height: 26px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.icon-label {
+    font-size: 10px;
+    margin-top: 2px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.video-controls-bar {
+    position: absolute;
+    bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+    left: 15px;
+    right: 75px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 25;
+}
+
+.progress-bar-container {
+    flex-grow: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-filled {
+    height: 100%;
+    width: 0%;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+.control-icon-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.ui-bottom { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); 
+    z-index: 20; 
+    background: linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.7), transparent); 
+}
+
+.channel-title {
+    font-weight: bold;
+    font-size: 15px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.btn-container { 
+    display: flex; 
+    gap: 8px; 
+    margin: 6px 0; 
+}
+
+.btn-mini { 
+    flex: 1; 
+    padding: 8px; 
+    border-radius: 8px; 
+    font-size: 11px; 
+    font-weight: 600; 
+    text-align: center; 
+    background: rgba(255,255,255,0.2); 
+    color: #fff; 
+    text-decoration: none; 
+    backdrop-filter: blur(5px); 
+}
+
+.btn-sub { 
+    background: #ff85a2 !important; 
+}
+
+#desc-box { 
+    font-size: 11px; 
+    color: #ddd; 
+    line-height: 1.25;
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+#status-message {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    background: #000; color: #fff; z-index: 35; padding: 30px; text-align: center;
+}
