@@ -1,4 +1,3 @@
-//<![CDATA[
 const CSV_INDO_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data.csv";
 const CSV_BARAT_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data2.csv";
 const CSV_HD_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data3.csv";
@@ -81,7 +80,7 @@ async function initVideoPlayer() {
         }
 
         if (videoList.length === 0) {
-            statusMessage.innerText = 'File CSV kosong atau format tidak valid!';
+            statusMessage.innerText = 'Data tidak tersedia!';
             statusMessage.style.color = '#ff6b6b';
             return;
         }
@@ -90,6 +89,9 @@ async function initVideoPlayer() {
         if (!videoItem) {
             videoItem = videoList[0];
         }
+
+        document.getElementById('page-title').innerText = videoItem.judul;
+        document.getElementById('meta-description').setAttribute('content', videoItem.deskripsi);
 
         let videoSourceUrl = '';
         if (category === 'indo') { 
@@ -160,8 +162,8 @@ async function initVideoPlayer() {
                         <div class="icon-label">Share</div>
                     </div>
                     <div class="icon-box" onclick="window.location.href='https://gawrge.blogspot.com/terbaru?cat=${category}'">
-                        <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Video"/>
-                        <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Video</div>
+                        <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" style="width:34px; height:34px; display:block; margin:0 auto; cursor:pointer;" alt="Hot Category"/>
+                        <div class="icon-label" style="font-weight:bold; color:#ff4500;">Hot Group</div>
                     </div>
                 </div>
 
@@ -185,50 +187,6 @@ async function initVideoPlayer() {
         `;
 
         statusMessage.style.display = 'none';
-
-        // Update SEO Meta Tags secara dinamis berdasarkan data video dari CSV
-        document.title = videoItem.judul + " | Esemph Pwink";
-        const metaTitle = document.getElementById('meta-title');
-        if (metaTitle) metaTitle.innerText = videoItem.judul + " | Esemph Pwink";
-        
-        const metaDesc = document.getElementById('meta-desc');
-        if (metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
-        
-        const ogTitle = document.getElementById('og-title');
-        if (ogTitle) ogTitle.setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        
-        const ogDesc = document.getElementById('og-desc');
-        if (ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
-        
-        const ogImage = document.getElementById('og-image');
-        if (ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
-        
-        const twitterTitle = document.getElementById('twitter-title');
-        if (twitterTitle) twitterTitle.setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        
-        const twitterDesc = document.getElementById('twitter-desc');
-        if (twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
-        
-        const twitterImage = document.getElementById('twitter-image');
-        if (twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
-        
-        const canonicalUrl = document.getElementById('canonical-url');
-        if (canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
-
-        // Update Schema.org JSON-LD
-        const schemaVideo = document.getElementById('schema-video');
-        if (schemaVideo) {
-            const schemaData = {
-                "@context": "https://schema.org",
-                "@type": "VideoObject",
-                "name": videoItem.judul,
-                "description": videoItem.deskripsi,
-                "thumbnailUrl": videoItem.thumbnail,
-                "uploadDate": "2026-01-01T00:00:00+07:00",
-                "contentUrl": videoSourceUrl
-            };
-            schemaVideo.text = JSON.stringify(schemaData, null, 2);
-        }
 
         const mainVideo = document.getElementById('main-video');
         const progressFilled = document.getElementById('progress-filled');
@@ -268,16 +226,15 @@ async function initVideoPlayer() {
 
         mainVideo.addEventListener('error', () => {
             statusMessage.innerHTML = 'Video gagal dimuat atau tidak tersedia.<br/><br/>' +
-                                      '<a href="' + nextVideoUrl + '" class="btn-next" style="display:inline-block; width:120px; background: #2ed573;">Next Video</a>';
+                                    '<a href="' + nextVideoUrl + '" class="btn-next" style="display:inline-block; width:120px; background: #2ed573;">Next Video</a>';
             statusMessage.style.display = 'flex';
             mainVideo.style.display = 'none';
         });
 
     } catch (err) {
-        statusMessage.innerText = 'Gagal mengambil data dari file CSV hosting.';
+        statusMessage.innerText = 'Gagal memuat data.';
         statusMessage.style.color = '#ff6b6b';
     }
 }
 
 initVideoPlayer();
-//]]>
