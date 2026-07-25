@@ -117,6 +117,7 @@ html, body {
     border-radius: 2px;
     cursor: pointer;
     position: relative;
+    overflow: visible !important;
 }
 
 .progress-filled {
@@ -125,9 +126,9 @@ html, body {
     background: #ffffff;
     border-radius: 2px;
     position: relative;
+    overflow: visible !important;
 }
 
-/* Handle kecil bulat untuk seek bar */
 .video-seek-thumb {
     position: absolute;
     right: -6px;
@@ -139,6 +140,7 @@ html, body {
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     pointer-events: none;
+    display: block !important;
 }
 
 .control-icon-btn {
