@@ -44,7 +44,6 @@ function shareVideo(title) {
     }
 }
 
-// Fungsi khusus untuk membaca metadata (Judul kolom 2 & Thumbnail kolom 3) lebih awal
 async function preloadMetadata() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('cat') || 'indo';
@@ -70,8 +69,8 @@ async function preloadMetadata() {
             if (parts.length >= 6) {
                 videoList.push({
                     slug: parts[0].replace(/^"|"$/g, ''),
-                    judul: parts[1].replace(/^"|"$/g, ''),      // Kolom 2: Judul
-                    thumbnail: parts[2].replace(/^"|"$/g, ''), // Kolom 3: Thumbnail
+                    judul: parts[1].replace(/^"|"$/g, ''),
+                    thumbnail: parts[2].replace(/^"|"$/g, ''),
                     deskripsi: parts[3].replace(/^"|"$/g, ''),
                     id_source: parts[4].replace(/^"|"$/g, ''),
                     id_short: parts[5].replace(/^"|"$/g, '')
@@ -82,7 +81,6 @@ async function preloadMetadata() {
         if (videoList.length > 0) {
             let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam) || videoList[0];
             
-            // Ubah Header / Title & Metadata secara instan menggunakan data kolom 2 dan kolom 3
             const pageTitle = videoItem.judul + " | Esemph Pwink";
             document.title = pageTitle;
             
@@ -99,7 +97,7 @@ async function preloadMetadata() {
             if(ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
 
             const ogImage = document.getElementById('og-image');
-            if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail); // Mengambil dari kolom 3
+            if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
             
             const twitterTitle = document.getElementById('twitter-title');
             if(twitterTitle) twitterTitle.setAttribute('content', pageTitle);
@@ -108,7 +106,7 @@ async function preloadMetadata() {
             if(twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
 
             const twitterImage = document.getElementById('twitter-image');
-            if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail); // Mengambil dari kolom 3
+            if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
             
             const canonicalUrl = document.getElementById('canonical-url');
             if(canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
@@ -159,8 +157,8 @@ async function initVideoPlayer() {
             if (parts.length >= 6) {
                 videoList.push({
                     slug: parts[0].replace(/^"|"$/g, ''),
-                    judul: parts[1].replace(/^"|"$/g, ''),      // Kolom 2
-                    thumbnail: parts[2].replace(/^"|"$/g, ''), // Kolom 3
+                    judul: parts[1].replace(/^"|"$/g, ''),
+                    thumbnail: parts[2].replace(/^"|"$/g, ''),
                     deskripsi: parts[3].replace(/^"|"$/g, ''),
                     id_source: parts[4].replace(/^"|"$/g, ''),
                     id_short: parts[5].replace(/^"|"$/g, '')
@@ -221,7 +219,7 @@ async function initVideoPlayer() {
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
         const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
 
-        // Menentukan URL Hot Video berdasarkan kategori aktif
+        // URL Hot Video mengarah ke Blogspot sesuai kategori aktif
         let hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=indo";
         if (category === 'barat') {
             hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=barat";
@@ -331,7 +329,6 @@ async function initVideoPlayer() {
     }
 }
 
-// Jalankan preloadMetadata sesegera mungkin agar title berubah tanpa menunggu seluruh DOM selesai
 preloadMetadata();
 window.addEventListener('DOMContentLoaded', initVideoPlayer);
 //]]>
