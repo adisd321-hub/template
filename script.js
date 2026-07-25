@@ -274,7 +274,6 @@ async function initVideoPlayer() {
 
         statusMessage.style.display = 'none';
 
-        // Event Listener Pemutar Video
         const mainVideo = document.getElementById('main-video');
         const progressFilled = document.getElementById('progress-filled');
         const progressContainer = document.getElementById('progress-container');
@@ -324,7 +323,7 @@ async function initVideoPlayer() {
     }
 }
 
-// Jalankan fungsi preload metadata terlebih dahulu untuk mengubah header title & thumbnail secepat mungkin
+// Jalankan preloadMetadata sesegera mungkin agar title berubah tanpa menunggu seluruh DOM selesai
 preloadMetadata();
 window.addEventListener('DOMContentLoaded', initVideoPlayer);
 //]]>
