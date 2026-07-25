@@ -1,135 +1,3 @@
-//<![CDATA[
-const CSV_INDO_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data.csv";
-const CSV_BARAT_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data2.csv";
-const CSV_HD_URL = "https://raw.githubusercontent.com/adisd321-hub/database-video/main/data3.csv";
-
-const videoPageContainer = document.getElementById('video-page-container');
-const statusMessage = document.getElementById('status-message');
-
-function parseCSVLine(text) {
-    let result = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        let char = text[i];
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            result.push(current.trim());
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    result.push(current.trim());
-    return result;
-}
-
-function processDownload(videoUrl, filename) {
-    const a = document.createElement('a');
-    a.href = videoUrl;
-    a.download = filename;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-function shareVideo(title) {
-    if (navigator.share) {
-        navigator.share({ title: title, url: window.location.href }).catch(() => {});
-    } else {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link berhasil disalin!');
-    }
-}
-
-async function preloadMetadata() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('cat') || 'indo';
-    const slugParam = urlParams.get('vid') || '';
-
-    let targetCsvUrl = CSV_INDO_URL;
-    if (category === 'barat') {
-        targetCsvUrl = CSV_BARAT_URL;
-    } else if (category === 'hd') {
-        targetCsvUrl = CSV_HD_URL;
-    }
-
-    try {
-        let response = await fetch(targetCsvUrl);
-        let csvText = await response.text();
-        let lines = csvText.split('\n');
-        let videoList = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-            let parts = parseCSVLine(line);
-            if (parts.length >= 6) {
-                videoList.push({
-                    slug: parts[0].replace(/^"|"$/g, ''),
-                    judul: parts[1].replace(/^"|"$/g, ''),
-                    thumbnail: parts[2].replace(/^"|"$/g, ''),
-                    deskripsi: parts[3].replace(/^"|"$/g, ''),
-                    id_source: parts[4].replace(/^"|"$/g, ''),
-                    id_short: parts[5].replace(/^"|"$/g, '')
-                });
-            }
-        }
-
-        if (videoList.length > 0) {
-            let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam) || videoList[0];
-            
-            const pageTitle = videoItem.judul + " | Esemph Pwink";
-            document.title = pageTitle;
-            
-            const metaTitle = document.getElementById('meta-title');
-            if(metaTitle) metaTitle.innerText = pageTitle;
-
-            const metaDesc = document.getElementById('meta-desc');
-            if(metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
-            
-            const ogTitle = document.getElementById('og-title');
-            if(ogTitle) ogTitle.setAttribute('content', pageTitle);
-
-            const ogDesc = document.getElementById('og-desc');
-            if(ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
-
-            const ogImage = document.getElementById('og-image');
-            if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
-            
-            const twitterTitle = document.getElementById('twitter-title');
-            if(twitterTitle) twitterTitle.setAttribute('content', pageTitle);
-
-            const twitterDesc = document.getElementById('twitter-desc');
-            if(twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
-
-            const twitterImage = document.getElementById('twitter-image');
-            if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
-            
-            const canonicalUrl = document.getElementById('canonical-url');
-            if(canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
-
-            const schemaVideo = document.getElementById('schema-video');
-            if(schemaVideo) {
-                const schemaData = {
-                    "@context": "https://schema.org",
-                    "@type": "VideoObject",
-                    "name": videoItem.judul,
-                    "description": videoItem.deskripsi,
-                    "thumbnailUrl": videoItem.thumbnail,
-                    "uploadDate": "2026-01-01T00:00:00+07:00",
-                    "contentUrl": category === 'indo' ? 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4' : ''
-                };
-                schemaVideo.text = JSON.stringify(schemaData, null, 2);
-            }
-        }
-    } catch (e) {
-        console.error("Gagal memuat metadata awal", e);
-    }
-}
-
 async function initVideoPlayer() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('cat') || 'indo';
@@ -219,12 +87,12 @@ async function initVideoPlayer() {
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
         const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
 
-        // URL Hot Video sesuai permintaan
-        let hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=indo";
+        // PERBAIKAN: Ubah URL di bawah ini sesuai dengan halaman tujuan Hot Video yang sebenarnya
+        let hotVideoUrl = "https://gawrge.blogspot.com/p/hot-video-indo.html";
         if (category === 'barat') {
-            hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=barat";
+            hotVideoUrl = "https://gawrge.blogspot.com/p/hot-video-barat.html";
         } else if (category === 'hd') {
-            hotVideoUrl = "https://gawrge.blogspot.com/terbaru?cat=hd";
+            hotVideoUrl = "https://gawrge.blogspot.com/p/hot-video-hd.html";
         }
 
         videoPageContainer.innerHTML = `
@@ -328,7 +196,3 @@ async function initVideoPlayer() {
         statusMessage.style.color = '#ff6b6b';
     }
 }
-
-preloadMetadata();
-window.addEventListener('DOMContentLoaded', initVideoPlayer);
-//]]>
