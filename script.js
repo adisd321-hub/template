@@ -237,3 +237,37 @@ async function initVideoPlayer() {
 
 initVideoPlayer();
 //]]>
+let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam);
+        if (!videoItem) {
+            videoItem = videoList[0];
+        }
+
+        let videoSourceUrl = '';
+        // ... (kode URL video Anda yang lain) ...
+
+        // ---- PASTE KODE SEO DI SINI ----
+        document.title = videoItem.judul + " | Esemph Pwink";
+        document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
+        document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
+        
+        document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
+        document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
+        
+        document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
+        document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
+        document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
+        
+        document.getElementById('canonical-url').setAttribute('href', window.location.href);
+
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": videoItem.judul,
+            "description": videoItem.deskripsi,
+            "thumbnailUrl": videoItem.thumbnail,
+            "uploadDate": "2026-01-01T00:00:00+07:00",
+            "contentUrl": videoSourceUrl
+        };
+        document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
+        // ---------------------------------
