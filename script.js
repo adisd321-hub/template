@@ -271,3 +271,30 @@ let videoItem = videoList.find(item => item.slug === slugParam || item.id_short 
         };
         document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
         // ---------------------------------
+
+// Contoh implementasi di dalam script.js Anda
+window.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    
+    // Pola regex untuk mendeteksi kategori dan slug
+    const indoMatch = path.match(/^\/indo\/(.+)$/);
+    const baratMatch = path.match(/^\/barat\/(.+)$/);
+    const hdMatch = path.match(/^\/hd\/(.+)$/);
+
+    if (indoMatch) {
+        const slug = indoMatch[1];
+        // Panggil fungsi untuk memuat data kategori 'Indo' berdasarkan slug dari CSV
+        loadVideoBySlugAndCategory('indo', slug);
+    } else if (baratMatch) {
+        const slug = baratMatch[1];
+        // Panggil fungsi untuk memuat data kategori 'Barat' berdasarkan slug dari CSV
+        loadVideoBySlugAndCategory('barat', slug);
+    } else if (hdMatch) {
+        const slug = hdMatch[1];
+        // Panggil fungsi untuk memuat data kategori 'HD' berdasarkan slug dari CSV
+        loadVideoBySlugAndCategory('hd', slug);
+    } else {
+        // Logika default halaman utama atau halaman lainnya
+        initDefaultPage();
+    }
+});
