@@ -45,7 +45,6 @@ function shareVideo(title) {
 }
 
 async function initVideoPlayer() {
-    // Membaca parameter query string: ?cat=...&vid=...
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('cat') || 'indo';
     const slugParam = urlParams.get('vid') || '';
@@ -92,6 +91,52 @@ async function initVideoPlayer() {
             videoItem = videoList[0];
         }
 
+        // --- PAKSA UPDATE TITLE & METADATA DI SINI AGAR TIDAK STATIS ---
+        const pageTitle = videoItem.judul + " | Esemph Pwink";
+        document.title = pageTitle;
+        
+        const metaTitle = document.getElementById('meta-title');
+        if(metaTitle) metaTitle.innerText = pageTitle;
+
+        const metaDesc = document.getElementById('meta-desc');
+        if(metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
+        
+        const ogTitle = document.getElementById('og-title');
+        if(ogTitle) ogTitle.setAttribute('content', pageTitle);
+
+        const ogDesc = document.getElementById('og-desc');
+        if(ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
+
+        const ogImage = document.getElementById('og-image');
+        if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
+        
+        const twitterTitle = document.getElementById('twitter-title');
+        if(twitterTitle) twitterTitle.setAttribute('content', pageTitle);
+
+        const twitterDesc = document.getElementById('twitter-desc');
+        if(twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
+
+        const twitterImage = document.getElementById('twitter-image');
+        if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
+        
+        const canonicalUrl = document.getElementById('canonical-url');
+        if(canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
+
+        const schemaVideo = document.getElementById('schema-video');
+        if(schemaVideo) {
+            const schemaData = {
+                "@context": "https://schema.org",
+                "@type": "VideoObject",
+                "name": videoItem.judul,
+                "description": videoItem.deskripsi,
+                "thumbnailUrl": videoItem.thumbnail,
+                "uploadDate": "2026-01-01T00:00:00+07:00",
+                "contentUrl": category === 'indo' ? 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4' : ''
+            };
+            schemaVideo.text = JSON.stringify(schemaData, null, 2);
+        }
+        // -------------------------------------------------------------
+
         let videoSourceUrl = '';
         if (category === 'indo') { 
             videoSourceUrl = 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4'; 
@@ -132,8 +177,6 @@ async function initVideoPlayer() {
 
         const currentIndex = videoList.findIndex(item => item.slug === videoItem.slug || item.id_short === videoItem.id_short);
         const nextItem = (currentIndex !== -1 && currentIndex < videoList.length - 1) ? videoList[currentIndex + 1] : videoList[0];
-        
-        // Tautan Next Video menggunakan format parameter query
         const nextVideoUrl = nextItem ? ('?cat=' + category + '&vid=' + nextItem.slug) : '#';
 
         videoPageContainer.innerHTML = `
@@ -188,32 +231,6 @@ async function initVideoPlayer() {
         `;
 
         statusMessage.style.display = 'none';
-
-        // Pengaturan SEO & Metadata Dinamis
-        document.title = videoItem.judul + " | Esemph Pwink";
-        if(document.getElementById('meta-title')) document.getElementById('meta-title').innerText = videoItem.judul + " | Esemph Pwink";
-        if(document.getElementById('meta-desc')) document.getElementById('meta-desc').setAttribute('content', videoItem.deskripsi);
-        
-        if(document.getElementById('og-title')) document.getElementById('og-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        if(document.getElementById('og-desc')) document.getElementById('og-desc').setAttribute('content', videoItem.deskripsi);
-        if(document.getElementById('og-image')) document.getElementById('og-image').setAttribute('content', videoItem.thumbnail);
-        
-        if(document.getElementById('twitter-title')) document.getElementById('twitter-title').setAttribute('content', videoItem.judul + " | Esemph Pwink");
-        if(document.getElementById('twitter-desc')) document.getElementById('twitter-desc').setAttribute('content', videoItem.deskripsi);
-        if(document.getElementById('twitter-image')) document.getElementById('twitter-image').setAttribute('content', videoItem.thumbnail);
-        
-        if(document.getElementById('canonical-url')) document.getElementById('canonical-url').setAttribute('href', window.location.href);
-
-        const schemaData = {
-            "@context": "https://schema.org",
-            "@type": "VideoObject",
-            "name": videoItem.judul,
-            "description": videoItem.deskripsi,
-            "thumbnailUrl": videoItem.thumbnail,
-            "uploadDate": "2026-01-01T00:00:00+07:00",
-            "contentUrl": videoSourceUrl
-        };
-        if(document.getElementById('schema-video')) document.getElementById('schema-video').text = JSON.stringify(schemaData, null, 2);
 
         // Event Listener Pemutar Video
         const mainVideo = document.getElementById('main-video');
