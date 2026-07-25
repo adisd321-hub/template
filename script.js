@@ -255,7 +255,9 @@ async function initVideoPlayer() {
 
                 <div class="video-controls-bar">
                     <div class="progress-bar-container" id="progress-container">
-                        <div class="progress-filled" id="progress-filled"></div>
+                        <div class="progress-filled" id="progress-filled">
+                            <div class="video-seek-thumb"></div>
+                        </div>
                     </div>
                     <button class="control-icon-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
                     <button class="control-icon-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
