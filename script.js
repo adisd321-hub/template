@@ -44,6 +44,94 @@ function shareVideo(title) {
     }
 }
 
+// Fungsi khusus untuk membaca metadata (Judul kolom 2 & Thumbnail kolom 3) lebih awal
+async function preloadMetadata() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('cat') || 'indo';
+    const slugParam = urlParams.get('vid') || '';
+
+    let targetCsvUrl = CSV_INDO_URL;
+    if (category === 'barat') {
+        targetCsvUrl = CSV_BARAT_URL;
+    } else if (category === 'hd') {
+        targetCsvUrl = CSV_HD_URL;
+    }
+
+    try {
+        let response = await fetch(targetCsvUrl);
+        let csvText = await response.text();
+        let lines = csvText.split('\n');
+        let videoList = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            let parts = parseCSVLine(line);
+            if (parts.length >= 6) {
+                videoList.push({
+                    slug: parts[0].replace(/^"|"$/g, ''),
+                    judul: parts[1].replace(/^"|"$/g, ''),      // Kolom 2: Judul
+                    thumbnail: parts[2].replace(/^"|"$/g, ''), // Kolom 3: Thumbnail
+                    deskripsi: parts[3].replace(/^"|"$/g, ''),
+                    id_source: parts[4].replace(/^"|"$/g, ''),
+                    id_short: parts[5].replace(/^"|"$/g, '')
+                });
+            }
+        }
+
+        if (videoList.length > 0) {
+            let videoItem = videoList.find(item => item.slug === slugParam || item.id_short === slugParam) || videoList[0];
+            
+            // Ubah Header / Title & Metadata secara instan menggunakan data kolom 2 dan kolom 3
+            const pageTitle = videoItem.judul + " | Esemph Pwink";
+            document.title = pageTitle;
+            
+            const metaTitle = document.getElementById('meta-title');
+            if(metaTitle) metaTitle.innerText = pageTitle;
+
+            const metaDesc = document.getElementById('meta-desc');
+            if(metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
+            
+            const ogTitle = document.getElementById('og-title');
+            if(ogTitle) ogTitle.setAttribute('content', pageTitle);
+
+            const ogDesc = document.getElementById('og-desc');
+            if(ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
+
+            const ogImage = document.getElementById('og-image');
+            if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail); // Mengambil dari kolom 3
+            
+            const twitterTitle = document.getElementById('twitter-title');
+            if(twitterTitle) twitterTitle.setAttribute('content', pageTitle);
+
+            const twitterDesc = document.getElementById('twitter-desc');
+            if(twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
+
+            const twitterImage = document.getElementById('twitter-image');
+            if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail); // Mengambil dari kolom 3
+            
+            const canonicalUrl = document.getElementById('canonical-url');
+            if(canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
+
+            const schemaVideo = document.getElementById('schema-video');
+            if(schemaVideo) {
+                const schemaData = {
+                    "@context": "https://schema.org",
+                    "@type": "VideoObject",
+                    "name": videoItem.judul,
+                    "description": videoItem.deskripsi,
+                    "thumbnailUrl": videoItem.thumbnail,
+                    "uploadDate": "2026-01-01T00:00:00+07:00",
+                    "contentUrl": category === 'indo' ? 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4' : ''
+                };
+                schemaVideo.text = JSON.stringify(schemaData, null, 2);
+            }
+        }
+    } catch (e) {
+        console.error("Gagal memuat metadata awal", e);
+    }
+}
+
 async function initVideoPlayer() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('cat') || 'indo';
@@ -71,8 +159,8 @@ async function initVideoPlayer() {
             if (parts.length >= 6) {
                 videoList.push({
                     slug: parts[0].replace(/^"|"$/g, ''),
-                    judul: parts[1].replace(/^"|"$/g, ''),
-                    thumbnail: parts[2].replace(/^"|"$/g, ''),
+                    judul: parts[1].replace(/^"|"$/g, ''),      // Kolom 2
+                    thumbnail: parts[2].replace(/^"|"$/g, ''), // Kolom 3
                     deskripsi: parts[3].replace(/^"|"$/g, ''),
                     id_source: parts[4].replace(/^"|"$/g, ''),
                     id_short: parts[5].replace(/^"|"$/g, '')
@@ -90,52 +178,6 @@ async function initVideoPlayer() {
         if (!videoItem) {
             videoItem = videoList[0];
         }
-
-        // --- PAKSA UPDATE TITLE & METADATA DI SINI AGAR TIDAK STATIS ---
-        const pageTitle = videoItem.judul + " | Esemph Pwink";
-        document.title = pageTitle;
-        
-        const metaTitle = document.getElementById('meta-title');
-        if(metaTitle) metaTitle.innerText = pageTitle;
-
-        const metaDesc = document.getElementById('meta-desc');
-        if(metaDesc) metaDesc.setAttribute('content', videoItem.deskripsi);
-        
-        const ogTitle = document.getElementById('og-title');
-        if(ogTitle) ogTitle.setAttribute('content', pageTitle);
-
-        const ogDesc = document.getElementById('og-desc');
-        if(ogDesc) ogDesc.setAttribute('content', videoItem.deskripsi);
-
-        const ogImage = document.getElementById('og-image');
-        if(ogImage) ogImage.setAttribute('content', videoItem.thumbnail);
-        
-        const twitterTitle = document.getElementById('twitter-title');
-        if(twitterTitle) twitterTitle.setAttribute('content', pageTitle);
-
-        const twitterDesc = document.getElementById('twitter-desc');
-        if(twitterDesc) twitterDesc.setAttribute('content', videoItem.deskripsi);
-
-        const twitterImage = document.getElementById('twitter-image');
-        if(twitterImage) twitterImage.setAttribute('content', videoItem.thumbnail);
-        
-        const canonicalUrl = document.getElementById('canonical-url');
-        if(canonicalUrl) canonicalUrl.setAttribute('href', window.location.href);
-
-        const schemaVideo = document.getElementById('schema-video');
-        if(schemaVideo) {
-            const schemaData = {
-                "@context": "https://schema.org",
-                "@type": "VideoObject",
-                "name": videoItem.judul,
-                "description": videoItem.deskripsi,
-                "thumbnailUrl": videoItem.thumbnail,
-                "uploadDate": "2026-01-01T00:00:00+07:00",
-                "contentUrl": category === 'indo' ? 'https://cdn2.videy.co/' + videoItem.id_source + '.mp4' : ''
-            };
-            schemaVideo.text = JSON.stringify(schemaData, null, 2);
-        }
-        // -------------------------------------------------------------
 
         let videoSourceUrl = '';
         if (category === 'indo') { 
@@ -282,5 +324,7 @@ async function initVideoPlayer() {
     }
 }
 
+// Jalankan fungsi preload metadata terlebih dahulu untuk mengubah header title & thumbnail secepat mungkin
+preloadMetadata();
 window.addEventListener('DOMContentLoaded', initVideoPlayer);
 //]]>
