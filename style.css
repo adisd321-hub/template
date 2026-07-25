@@ -117,7 +117,6 @@ html, body {
     border-radius: 2px;
     cursor: pointer;
     position: relative;
-    overflow: visible !important;
 }
 
 .progress-filled {
@@ -125,22 +124,6 @@ html, body {
     width: 0%;
     background: #ffffff;
     border-radius: 2px;
-    position: relative;
-    overflow: visible !important;
-}
-
-.video-seek-thumb {
-    position: absolute;
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    background: #ffffff;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
-    display: block !important;
 }
 
 .control-icon-btn {
